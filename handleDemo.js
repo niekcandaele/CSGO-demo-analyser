@@ -33,6 +33,7 @@ module.exports = demoFile => {
         //console.log(`Bomb planted on site ${e.site} by ${player.name}`);
         roundData.bombPlanted = {
           by: player.steam64Id,
+          location: player.position,
           site: e.site,
           tick: demoFile.currentTick
         };
@@ -43,6 +44,7 @@ module.exports = demoFile => {
         //console.log(`Bomb defused on site ${e.site} by ${player.name}`);
         roundData.bombDefused = {
           by: player.steam64Id,
+          location: player.position,
           site: e.site,
           tick: demoFile.currentTick
         };
