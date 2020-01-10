@@ -28,6 +28,33 @@ module.exports = demoFile => {
         }
       });
 
+      demoFile.gameEvents.on("player_hurt", e => {
+        const victim = demoFile.entities.getByUserId(e.userid);
+        const attacker = demoFile.entities.getByUserId(e.attacker);
+
+        let attackerData;
+
+        // Sometimes there is no 'attacker'. Fall damage for example
+        if (attacker) {
+          attackerData = { steamId: attacker.steam64Id, name: attacker.name };
+        } else {
+          attackerData = null;
+        }
+
+        roundData.playerHurt.push({
+          victim: {
+            steamId: victim.steam64Id,
+            name: victim.name
+          },
+          attacker: attackerData,
+          tick: demoFile.currentTick,
+          weapon: e.weapon,
+          dmgHealth: e.dmg_health,
+          dmgArmour: e.dmg_armor,
+          hitgroup: e.hitgroup
+        });
+      });
+
       demoFile.gameEvents.on("player_death", e => {
         const victim = demoFile.entities.getByUserId(e.userid);
         const victimName = victim ? victim.name : "unnamed";
@@ -52,7 +79,8 @@ module.exports = demoFile => {
             health: attacker.health,
             isScoped: attacker.isScoped,
             weapon: attacker.weapon.itemName,
-            freezeTimeEndEquipmentValue: attacker.freezeTimeEndEquipmentValue
+            freezeTimeEndEquipmentValue: attacker.freezeTimeEndEquipmentValue,
+            position: attacker.position
           },
           victim: {
             steamId: victim.steam64Id,
@@ -62,9 +90,11 @@ module.exports = demoFile => {
             hasC4: victim.hasC4,
             health: victim.health,
             isScoped: victim.isScoped,
-            freezeTimeEndEquipmentValue: victim.freezeTimeEndEquipmentValue
+            freezeTimeEndEquipmentValue: victim.freezeTimeEndEquipmentValue,
+            position: victim.position
           },
-          hs: e.headshot
+          hs: e.headshot,
+          tick: demoFile.currentTick
         });
       });
 
@@ -91,7 +121,8 @@ module.exports = demoFile => {
 
 function generateNewRoundData() {
   return {
-    kills: []
+    kills: [],
+    playerHurt: []
   };
 }
 
