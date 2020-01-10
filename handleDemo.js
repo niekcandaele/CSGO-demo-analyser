@@ -28,6 +28,34 @@ module.exports = demoFile => {
         }
       });
 
+      demoFile.gameEvents.on("bomb_planted", e => {
+        const player = demoFile.entities.getByUserId(e.userid);
+        //console.log(`Bomb planted on site ${e.site} by ${player.name}`);
+        roundData.bombPlanted = {
+          by: player.steam64Id,
+          site: e.site,
+          tick: demoFile.currentTick
+        };
+      });
+
+      demoFile.gameEvents.on("bomb_defused", e => {
+        const player = demoFile.entities.getByUserId(e.userid);
+        //console.log(`Bomb defused on site ${e.site} by ${player.name}`);
+        roundData.bombDefused = {
+          by: player.steam64Id,
+          site: e.site,
+          tick: demoFile.currentTick
+        };
+      });
+
+      demoFile.gameEvents.on("bomb_exploded", e => {
+        console.log(`Bomb exploded on site ${e.site}`);
+        roundData.bombDefused = {
+          site: e.site,
+          tick: demoFile.currentTick
+        };
+      });
+
       demoFile.gameEvents.on("player_hurt", e => {
         const victim = demoFile.entities.getByUserId(e.userid);
         const attacker = demoFile.entities.getByUserId(e.attacker);
@@ -122,7 +150,10 @@ module.exports = demoFile => {
 function generateNewRoundData() {
   return {
     kills: [],
-    playerHurt: []
+    playerHurt: [],
+    bombPlanted: false,
+    bombDefused: false,
+    bombExploded: false
   };
 }
 
