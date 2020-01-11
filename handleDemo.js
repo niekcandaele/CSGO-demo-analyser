@@ -156,18 +156,30 @@ module.exports = demoFile => {
 
       demoFile.gameEvents.on("player_death", e => {
         const victim = demoFile.entities.getByUserId(e.userid);
-        const victimName = victim ? victim.name : "unnamed";
+        const attacker = demoFile.entities.getByUserId(e.attacker);
+        const assister = demoFile.entities.getByUserId(e.assister);
 
         // Attacker may have disconnected so be aware.
         // e.g. attacker could have thrown a grenade, disconnected, then that grenade killed another player.
-        const attacker = demoFile.entities.getByUserId(e.attacker);
-        const attackerName = attacker ? attacker.name : "unnamed";
-
-        const headshotText = e.headshot ? " HS" : "";
 
         /*         console.log(
           `${attackerName} [${e.weapon}${headshotText}] ${victimName}`
         ); */
+
+        let assisterData;
+
+        if (assister) {
+          assisterData = {
+            steamId: assister.steam64Id,
+            cashSpendThisRound: assister.cashSpendThisRound,
+            name: assister.name,
+            health: assister.health,
+            freezeTimeEndEquipmentValue: assister.freezeTimeEndEquipmentValue
+          };
+        } else {
+          assisterData = false;
+        }
+
         roundData.kills.push({
           attacker: {
             steamId: attacker.steam64Id,
@@ -192,6 +204,7 @@ module.exports = demoFile => {
             freezeTimeEndEquipmentValue: victim.freezeTimeEndEquipmentValue,
             position: victim.position
           },
+          assister: assisterData,
           hs: e.headshot,
           tick: demoFile.currentTick
         });
