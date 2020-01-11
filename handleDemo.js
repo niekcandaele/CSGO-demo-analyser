@@ -19,6 +19,7 @@ module.exports = demoFile => {
       });
 
       demoFile.gameEvents.on("round_start", () => {
+        roundData = generateNewRoundData();
         for (const player of demoFile.players) {
           if (!data.players[player.steam64Id]) {
             data.players[player.steam64Id] = generateEmptyPlayerData(
@@ -27,6 +28,10 @@ module.exports = demoFile => {
           }
         }
       });
+
+      /**
+       * Bomb methods
+       */
 
       demoFile.gameEvents.on("bomb_planted", e => {
         const player = demoFile.entities.getByUserId(e.userid);
@@ -57,6 +62,10 @@ module.exports = demoFile => {
           tick: demoFile.currentTick
         };
       });
+
+      /**
+       * Nade methods
+       */
 
       demoFile.gameEvents.on("hegrenade_detonate", e => {
         const player = demoFile.entities.getByUserId(e.userid);
@@ -95,10 +104,33 @@ module.exports = demoFile => {
       https://saul.github.io/demofile/interfaces/_eventtypes_.ieventmolotovdetonate.html -> Unexpected data, I think this only happens if a molly explodes mid air
       */
 
+      /**
+       * Player methods
+       */
+
+      demoFile.gameEvents.on("player_blind", e => {
+        const victim = demoFile.entities.getByUserId(e.userid);
+        const attacker = demoFile.entities.getByUserId(e.attacker);
+        //console.log(`${victim.name} was blinded for ${e.blind_duration} by ${attacker.name}`);
+        roundData.blinded.push({
+          victim: {
+            steamId: victim.steam64Id,
+            name: victim.name,
+            position: victim.position
+          },
+          attacker: {
+            steamId: attacker.steam64Id,
+            name: attacker.name
+          },
+          duration: e.blind_duration
+        });
+      });
+
       demoFile.gameEvents.on("player_hurt", e => {
         const victim = demoFile.entities.getByUserId(e.userid);
         const attacker = demoFile.entities.getByUserId(e.attacker);
 
+        //console.log(`${victim.name} took ${e.dmg_health} damage from ${attacker.name}`);
         let attackerData;
 
         // Sometimes there is no 'attacker'. Fall damage for example
@@ -165,8 +197,6 @@ module.exports = demoFile => {
         });
       });
 
-      // EXAMPLE: Round end info
-
       demoFile.gameEvents.on("round_officially_ended", e => {
         const teams = demoFile.teams;
 
@@ -174,7 +204,6 @@ module.exports = demoFile => {
         const cts = teams[3];
 
         data.rounds.push(roundData);
-        roundData = generateNewRoundData();
       });
 
       // When demo file is finished, resolve the function call
@@ -191,6 +220,7 @@ function generateNewRoundData() {
     kills: [],
     playerHurt: [],
     grenades: [],
+    blinded: [],
     bombPlanted: false,
     bombDefused: false,
     bombExploded: false
