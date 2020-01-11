@@ -1,0 +1,83 @@
+type Player {
+  createdAt: DateTime! @createdAt
+  updatedAt: DateTime! @updatedAt
+  id: ID! @id
+  steamId: String! @unique
+  name: String!
+}
+
+type Match {
+  createdAt: DateTime! @createdAt
+  updatedAt: DateTime! @updatedAt
+  id: ID! @id
+  fileHash: String! @unique
+  players: [Player]
+  rounds: [Round]
+}
+
+type Round {
+  createdAt: DateTime! @createdAt
+  updatedAt: DateTime! @updatedAt
+  id: ID! @id
+  match: Match!
+  kills: [Kill]
+}
+
+type Kill {
+  createdAt: DateTime! @createdAt
+  updatedAt: DateTime! @updatedAt
+  id: ID! @id
+  round: Round!
+  headshot: Boolean!
+  tick: Int!
+  attacker: PlayerInfo! @relation(name: "Kill_Attacker")
+  victim: PlayerInfo! @relation(name: "Kill_Victim")
+  assister: PlayerInfo @relation(name: "Kill_Assister")
+}
+
+type PlayerInfo {
+  createdAt: DateTime! @createdAt
+  updatedAt: DateTime! @updatedAt
+  id: ID! @id    
+  player: Player!
+  equipmentValue: Int
+  cashSpendThisRound: Int!
+  freezeTimeEndEquipmentValue: Int!
+  hasC4: Boolean
+  health: Int
+  isScoped: Boolean
+  weapon: String
+  position: Position
+}
+
+type PlayerHurt {
+  createdAt: DateTime! @createdAt
+  updatedAt: DateTime! @updatedAt
+  id: ID! @id
+  round: Round!
+  attacker: PlayerInfo @relation(name: "Hurt_Attacker")
+  victim: PlayerInfo! @relation(name: "Hurt_Victim")
+  tick: Int!
+  weapon: String!
+  damageHealth: Int!
+  damageArmour: Int!
+  hitGroup: Int!
+}
+
+type PlayerBlind {
+  createdAt: DateTime! @createdAt
+  updatedAt: DateTime! @updatedAt
+  id: ID! @id
+  round: Round!
+  attacker: PlayerInfo! @relation(name: "Blind_Attacker")
+  victim: PlayerInfo! @relation(name: "Blind_Victim")
+  duration: Float!
+  tick: Int!
+}
+
+type Position {
+  id: ID! @id
+  x: Float!
+  y: Float!
+  z: Float!    
+}

@@ -3,3 +3,6 @@ node_modules
 # Exclude any demo files but keep the folder
 demos/*
 !demos/.gitkeep
+
+
+prisma-client
