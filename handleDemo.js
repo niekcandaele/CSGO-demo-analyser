@@ -51,12 +51,49 @@ module.exports = demoFile => {
       });
 
       demoFile.gameEvents.on("bomb_exploded", e => {
-        console.log(`Bomb exploded on site ${e.site}`);
+        //console.log(`Bomb exploded on site ${e.site}`);
         roundData.bombDefused = {
           site: e.site,
           tick: demoFile.currentTick
         };
       });
+
+      demoFile.gameEvents.on("hegrenade_detonate", e => {
+        const player = demoFile.entities.getByUserId(e.userid);
+        //console.log(`${player.name} detonated a HE ${e.x} ${e.y} ${e.z}`);
+        roundData.grenades.push({
+          type: "HE",
+          position: { x: e.x, y: e.y, z: e.z },
+          player: { steamId: player.steam64Id, name: player.name }
+        });
+      });
+
+      demoFile.gameEvents.on("flashbang_detonate", e => {
+        const player = demoFile.entities.getByUserId(e.userid);
+        //console.log(`${player.name} detonated a flash ${e.x} ${e.y} ${e.z}`);
+        roundData.grenades.push({
+          type: "flash",
+          position: { x: e.x, y: e.y, z: e.z },
+          player: { steamId: player.steam64Id, name: player.name }
+        });
+      });
+
+      demoFile.gameEvents.on("smokegrenade_detonate", e => {
+        const player = demoFile.entities.getByUserId(e.userid);
+        //console.log(`${player.name} detonated a smoke ${e.x} ${e.y} ${e.z}`);
+        roundData.grenades.push({
+          type: "smoke",
+          position: { x: e.x, y: e.y, z: e.z },
+          player: { steamId: player.steam64Id, name: player.name }
+        });
+      });
+
+      // TODO: molotovs
+      /*
+      These are a bit tricky
+      https://saul.github.io/demofile/interfaces/_eventtypes_.inonspecificgameeventinfernostartburn.html -> Does not include the player that threw the molotov
+      https://saul.github.io/demofile/interfaces/_eventtypes_.ieventmolotovdetonate.html -> Unexpected data, I think this only happens if a molly explodes mid air
+      */
 
       demoFile.gameEvents.on("player_hurt", e => {
         const victim = demoFile.entities.getByUserId(e.userid);
@@ -153,6 +190,7 @@ function generateNewRoundData() {
   return {
     kills: [],
     playerHurt: [],
+    grenades: [],
     bombPlanted: false,
     bombDefused: false,
     bombExploded: false
